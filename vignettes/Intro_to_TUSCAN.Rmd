@@ -1,0 +1,70 @@
+---
+title: "Introduction to TUSCAN"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to TUSCAN}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  #collapse = TRUE,
+  #comment = "#>",
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+```{r setup}
+library(TUSCAN)
+library(magick)
+```
+
+```{r}
+# load example data
+data("example_count")
+data("example_loc")
+image_path <- system.file("data", "example.jpg", package = "TUSCAN")
+img <- image_read(image_path)
+```
+
+```{r}
+# create a TUSCAN object
+obj <- createTUSCANObject(counts = example_count, location = example_loc, img = img)
+```
+
+```{r}
+# reduce dimension
+obj <- reduceDim(object = obj, epochs = 50, seed = 1234)
+```
+
+```{r}
+# pre-clustering
+obj <- PreCluster(object = obj, method = 'km', k=6, seed = 1234)
+
+# visualize
+plotSpatial(obj = obj, class = "cluster", size = 3)
+```
+
+```{r}
+# find normal cluster
+FindNormalCluster(obj)
+```
+
+```{r}
+cnv_obj <- runCNV(object = obj, ref_group_names = c("1"), normalization = FALSE)
+```
+
+```{r}
+plotCNVheatmap(object = cnv_obj, title = "heatmap")
+```
+
+```{r}
+tumor <- TumorCluster(object = cnv_obj, seed = 1234)
+```
+
+```{r}
+plotSpatial(obj = tumor, class = "tumor", size = 3)
+```

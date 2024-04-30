@@ -1,0 +1,33 @@
+Package: TUSCAN
+Title: Tumor Segmentation and Classification Analysis in Spatial Transcriptomics
+Version: 0.0.0.9000
+Authors@R: 
+    c(person("Chenxuan", "Zang", , "czang@mdanderson.org", role = c("aut", "cre")),
+      person("Peng", "Wei", , "pwei2@mdanderson.org", role = c("aut")),
+      person("Ziyi", "Li", , "zli16@mdanderson.org", role = c("aut")),
+      person("Charles C.", "Guo", , "ccguo@mdanderson.org", role = c("aut")))
+Description: TUSCAN is an automated method that performs tumor segmentation and classification analysis by inferring spatial copy number profiles from gene expression and histology images in spatial transcriptomics data.
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+    license
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Imports: 
+    cluster,
+    ConsensusClusterPlus,
+    dplyr,
+    ggplot2,
+    igraph,
+    keras,
+    magick,
+    Seurat,
+    tensorflow
+Depends: 
+    R (>= 2.10)
+LazyData: true
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
