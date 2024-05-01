@@ -7,6 +7,7 @@ clustering of all spots based on the gene information dimensionally reduced by a
 
 ## Software dependencies
 - R version >= 4.0.0.  
-- R packages:
+- R packages:  magick, Seurat, cluster, ConsensusClusterPlus, dplyr, ggplot2, igraph, keras, tensorflow, dlm, RColorBrewer, ComplexHeatmap, grid, stats
   
 ## Installation
+The R package can be installed from github:
