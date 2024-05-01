@@ -18,11 +18,13 @@ if (!requireNamespace("devtools", quietly = TRUE))
 
 devtools::install_github('CZang409/TUSCAN')
 ```
+
 Note that TUSCAN relies on the keras and tensorflow R package, which can be installed through:
 ```R
 install.packages("keras")
 library(keras)
 install_keras()
+# install_keras() will install a version of TensorFlow that is compatible with the current version of the keras package.
 ```
 
 TUSCAN depends on R package `ConsensusClusterPlus`, if you encouter this error when trying to install this package: "package 'ConsensusClusterPlus' is not available for this version of R", please install it through [Bioconductor](https://bioconductor.org/packages/release/bioc/html/ConsensusClusterPlus.html):
@@ -31,9 +33,6 @@ if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
 BiocManager::install("ConsensusClusterPlus")
-```
-
-# install_keras() will install a version of TensorFlow that is compatible with the current version of the keras package.
 ```
 
 ## Tutorial
