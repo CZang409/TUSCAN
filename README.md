@@ -11,8 +11,10 @@ clustering of all spots based on the gene information dimensionally reduced by a
   
 ## Installation
 The R package can be installed from github:
-`# Install devtools, if necessary
+```R
+# Install devtools, if necessary
 if (!requireNamespace("devtools", quietly = TRUE))
     install.packages("devtools")
 
-devtools::install_github('CZang409/TUSCAN')`
+devtools::install_github('CZang409/TUSCAN')
+```R
