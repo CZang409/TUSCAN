@@ -1,5 +1,4 @@
 # TUSCAN
-## Tumor Segmentation and Classification Analysis in Spatial Transcriptomics
 
 `TUSCAN` is an R package that aims to perform tumor segmentation and classification analysis by constructing a spatial copy number profile. TUSCAN takes both the gene information from spatial transcriptomics data and the hematoxylin and eosin (H&E) staining image as input to improve the accuracy of tumor region identification. 
 
