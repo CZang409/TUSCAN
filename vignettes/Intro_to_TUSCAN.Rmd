@@ -71,7 +71,7 @@ The input image should be the original high-resolution H&E image of the measured
 ## load the example histology image
 image_path <- system.file("data", "example.jpg", package = "TUSCAN")
 img <- image_read(image_path)
-par(mar = c(1, 0, 1, 0))
+par(c(1,0,1,0))
 plot(img)
 ```
 
