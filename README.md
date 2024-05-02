@@ -19,7 +19,7 @@ if (!requireNamespace("devtools", quietly = TRUE))
 devtools::install_github('CZang409/TUSCAN')
 ```
 
-Note that TUSCAN relies on the keras and tensorflow R package, which can be installed through:
+Note that TUSCAN relies on the `keras` and `tensorflow` R package, which can be installed through:
 ```R
 install.packages("keras")
 library(keras)
