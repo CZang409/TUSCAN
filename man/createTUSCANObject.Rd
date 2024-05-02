@@ -7,25 +7,9 @@
 createTUSCANObject(counts, location, project = "TUSCAN", img, r = 49)
 }
 \arguments{
-\item{counts}{Raw spatial transcriptomics gene expression count matrix, the dimension is \eqn{m \times n}, where \eqn{m} is the number of genes and \eqn{n} is the number of spots.
+\item{counts}{Raw spatial transcriptomics gene expression count matrix, the dimension is \eqn{m \times n}, where \eqn{m} is the number of genes and \eqn{n} is the number of spots.}
 
-example:
-10X13 10X14 10X15 10X16  ...
-FO538757.1    0    0     0     0
-SAMD11        0    0     0     0
-NOC2L         0    0     0     0
-KLHL17        0    0     0     0
-...}
-
-\item{location}{Dataframe containing the spatial coordinates of all spots, where each row represents a spot and two columns represent the \eqn{x} and \eqn{y} coordinates of the spatial location, respectively.
-
-example:
-x          y
-10X13    2573.12   3493.69
-10X14    2559.81   3790.17
-10X15    2574.28   4075.00
-10X16    2575.73   4373.23
-...}
+\item{location}{Dataframe containing the spatial coordinates of all spots, where each row represents a spot and two columns represent the \eqn{x} and \eqn{y} coordinates of the spatial location, respectively.}
 
 \item{project}{Name of the project.}
 

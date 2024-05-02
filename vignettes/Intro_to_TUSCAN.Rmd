@@ -1,5 +1,6 @@
 ---
 title: "Introduction to TUSCAN"
+author: "Chenxuan Zang, Charles C. Guo, Peng Wei, and Ziyi Li"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to TUSCAN}
@@ -9,62 +10,196 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  #collapse = TRUE,
-  #comment = "#>",
-  echo = TRUE,
-  warning = FALSE,
-  message = FALSE
+  collapse = TRUE,
+  comment = "#>",
+  out.width="90%",
+  fig.width=6, fig.height=4.5,
+  dpi=300,
+  message=FALSE, warning=FALSE, error=FALSE
 )
 ```
 
 ```{r setup}
 library(TUSCAN)
+library(Seurat)
 library(magick)
 ```
 
+
+## Loading required input data
+
+
+TUSCAN requires three types of input data:
+
+- Spatial transcriptomics count data.   
+- Spatial location information.  
+- Original histology image.   
+
+We used the HER2-positive breast cancer sample data (patient B, replicate 1) from the 2021 Andersson's paper for the illustration in this vignette. The gene expression profile was measured from the Spatial Transcriptomics (ST) platform, with 293 spots and 16,148 genes detected.
+
+
+### Spatial transcriptomics count data
+
+
+The spatial raw count data should be a $N \times D$ matrix, with rows ($N$) representing genes and columns ($D$) representing spots. 
+
 ```{r}
-# load example data
+## load the example spatial count data
 data("example_count")
+print(example_count[1:4,1:4])
+```
+
+
+### Spatial location information
+
+
+The spatial location data should be a dataframe where each row represents a spatial spot. This dataframe contains two columns 'x' and 'y', with 'x' representing the row pixel coordinate of the spot on the histology image and 'y' representing the column pixel coordinate of the spot on the histology image. The rownames of the spatial location dataframe should match exactly with the colnames of the spatial count data.
+
+```{r}
+## load the example spatial location data
 data("example_loc")
+print(example_loc[1:4,])
+```
+
+
+### Histology image
+
+
+The input image should be the original high-resolution H&E image of the measured sample.
+
+```{r, fig.align='center'}
+## load the example histology image
 image_path <- system.file("data", "example.jpg", package = "TUSCAN")
+img <- image_read(image_path)
+par(mar = c(1, 0, 1, 0))
+plot(img)
+```
+
+Here provide an example code to read in 10x Visium data. 
+
+```{r example, eval=FALSE}
+library(dplyr)
+
+count.data <- Seurat::Read10X_h5("path/to/name_filtered_feature_bc_matrix.h5")
+loc.data <- read.csv("path/to/tissue_positions_list.csv")
+loc.data <- loc.data %>% filter (X0==1)
+loc.data <- data.frame(x=loc.data[,6],y=loc.data[,5])
+image_path <- "path/to/image"
 img <- image_read(image_path)
 ```
 
-```{r}
-# create a TUSCAN object
-obj <- createTUSCANObject(counts = example_count, location = example_loc, img = img)
-```
+
+### Create TUSCAN object
+
+
+We can use `createTUSCANObject()` to create a TUSCAN object. The required inputs are raw count matrix, location, and image. `project` is a parameter that allows users to name their own project. `r` is an image smoothing parameter. A detailed explanation could refer to `help(createTUSCANObject)`.
+
 
 ```{r}
-# reduce dimension
-obj <- reduceDim(object = obj, epochs = 50, seed = 1234)
+obj <- createTUSCANObject(counts = example_count, 
+                          location = example_loc, 
+                          img = img, 
+                          project="TUSCAN", 
+                          r=49)
 ```
+
+
+## Identify normal reference
+
+
+### Dimension reduction
+
+
+We first perform dimensional reduction on the spatial gene count data. This step is realized by employing an autoencoder on the top `nhvg` (default is 2000) highly variable genes (HVGs). `d` is the number of dimensions after reduction (default is 20). 
+
+
+```{r}
+obj <- reduceDim(object = obj, nhvg=2000,d=20,epochs=50,batch_size=64, seed = 1234)
+```
+
+
+### Preliminary clustering
+
+
+To accurately infer copy number variations (CNV) through SRT data, we need to first recognize a subset of normal spots as the reference baseline values. So we first conduct a preliminary clustering based on the spatial gene expression data and histology image. Since more than one cluster may comprise normal cells, we recommend over clustering at this step to identify the most likely cluster with the highest purity as the normal cluster.
+
+`PreCluster()` functions clusters the spots. It provides two clustering methods:`km`(K-Means) and `louvain` (Louvain). For K-Means method, the number of clusters `k` needs to be specified. For louvain clustering, the number of clusters can be adjusted by the parameter `res`. 
+
 
 ```{r}
 # pre-clustering
 obj <- PreCluster(object = obj, method = 'km', k=6, seed = 1234)
-
-# visualize
-plotSpatial(obj = obj, class = "cluster", size = 3)
 ```
 
+
+### Visualizing spatial clusters
+
+```{r, fig.align='center'}
+plotSpatial(obj = obj, class = "cluster", size = 5)
+```
+
+
+### Determine the cluster selected as the reference
+
+
+`FindNormalCluster()` function can print the name of group from the previous clustering result that is most probable to be the normal reference.
+
 ```{r}
-# find normal cluster
 FindNormalCluster(obj)
 ```
 
-```{r}
-cnv_obj <- runCNV(object = obj, ref_group_names = c("1"), normalization = FALSE)
-```
+
+## Inferring the spatial copy number profile
+
+
+Next we can run the `runCNV()` function to construct the CNV profile. The essential parameters are:
+
+- `object`: TUSCAN object.   
+- `ref_group_names`: A vector containing the cluster name(s) of the reference spots used for inferring CNV.      
+- `min_ave_counts_per_gene`: Minimum average gene expression level across all spots (default: 0.01).   
+- `min_spots_per_gene`: Minimum number of spots requiring expression measurements to include the corresponding gene (default: 3).   
+- `chr_exclude`: List of chromosomes in the reference genome annotations that should be excluded from analysis (default: c('chrX', 'chrY', 'chrM').    
+- `normalization`: Whether perform normalization step. We suggest to skip this step if the SRT data is generated from ST platform (default: TRUE).    
+
+The computed copy number matrix is stored in the slot `cnv.data` of the TUSCAN object. More details of `runCNV()` function could refer to `help(runCNV)`.
+
 
 ```{r}
-plotCNVheatmap(object = cnv_obj, title = "heatmap")
+cnv_obj <- runCNV(object = obj, 
+                  ref_group_names = c("1"),
+                  min_ave_counts_per_gene=0.01,
+                  min_spots_per_gene=3,
+                  chr_exclude=c('chrX', 'chrY', 'chrM'),
+                  normalization = FALSE)
 ```
+
+
+### Visualizing spatial CNV by heatmap
+
+
+```{r}
+plotCNVheatmap(object = cnv_obj, title = "heatmap", output_format = "png")
+```
+
+
+```{r, fig.align='center'}
+image <- image_read("heatmap.png")
+par(mar = c(0.5, 0.2, 0.5, 0.2))
+plot(image)
+```
+
+
+## Identify tumor region
+
 
 ```{r}
 tumor <- TumorCluster(object = cnv_obj, seed = 1234)
 ```
 
-```{r}
-plotSpatial(obj = tumor, class = "tumor", size = 3)
+
+### Visualizing tumor region
+
+
+```{r, fig.align='center'}
+plotSpatial(obj = tumor, class = "tumor", size = 5)
 ```

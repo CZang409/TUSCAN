@@ -196,24 +196,29 @@ plotCNVheatmap <- function(object,color_belt=NULL,output_format=c("png", "pdf"),
   )
 
   # plot
+
   if(output_format=="png"){
 
     png(paste(title,".png",sep=""),width = 25/7*480,height = 20/7*480)
+
     draw(ht_normal %v% ht_other,
-         annotation_legend_list = pd,
-         annotation_legend_side = "bottom",
-         heatmap_legend_side = "right"
+        annotation_legend_list = pd,
+        annotation_legend_side = "bottom",
+        heatmap_legend_side = "right"
     )
+
     dev.off()
 
   }else if(output_format=="pdf"){
 
     pdf(paste(title,".pdf",sep=""),width = 25,height = 20)
+
     draw(ht_normal %v% ht_other,
          annotation_legend_list = pd,
          annotation_legend_side = "bottom",
          heatmap_legend_side = "right"
     )
+
     dev.off()
   }
 

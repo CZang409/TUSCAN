@@ -1,6 +1,6 @@
 Package: TUSCAN
 Title: Tumor Segmentation and Classification Analysis in Spatial Transcriptomics
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: 
     c(person("Chenxuan", "Zang", , "czang@mdanderson.org", role = c("aut", "cre")),
       person("Peng", "Wei", , "pwei2@mdanderson.org", role = c("aut")),
@@ -23,7 +23,7 @@ Imports:
     Seurat,
     tensorflow
 Depends: 
-    R (>= 2.10)
+    R (>= 4.0)
 LazyData: true
 Suggests: 
     knitr,
