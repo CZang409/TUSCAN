@@ -36,4 +36,4 @@ BiocManager::install("ConsensusClusterPlus")
 ```
 
 ## Tutorial
-Details in Tutorial
+Details in [Tutorial](https://czang409.github.io/TUSCAN/)
