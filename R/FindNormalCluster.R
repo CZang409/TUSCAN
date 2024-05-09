@@ -60,4 +60,6 @@ FindNormalCluster <- function(object,w=0.5){
 
   print(paste("Cluster ",ref_group," is selected as the normal reference.",sep=""))
 
+  return(ref_group)
+
 }
