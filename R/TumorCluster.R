@@ -59,7 +59,7 @@ TumorCluster <- function(object,seed=NULL,maxK=3,reps=100,pItem=0.8,pFeature=1,
   })
   centroids_matrix <- do.call(rbind, centroids)
   rownames(centroids_matrix) <- c("Norm", "Mat1", "Mat2")
-  dist_matrix <- proxy::dist(centroids_matrix)
+  dist_matrix <- dist(centroids_matrix)
   tumor <- which.max(dist_matrix[1:2])
   img <- img %>% mutate(tumor = ifelse(consensus == tumor, "Tumor", "Normal"),
                         tumor = factor(tumor, levels = c("Tumor", "Normal")))
