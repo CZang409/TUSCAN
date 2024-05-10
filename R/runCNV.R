@@ -36,7 +36,9 @@
 #' @param min_spots_per_gene Minimum number of spots requiring expression measurements to include the corresponding gene (default: 3).
 #' @param chr_exclude List of chromosomes in the reference genome annotations that should be excluded from analysis (default: c('chrX', 'chrY', 'chrM').
 #' @param max_centered_threshold Maximum value a value can have after centering. Also sets a lower bound of -1 * this value (default: 3).
-#' @param normalization Whether perform normalization step. We suggest to skip this step if the SRT data is generated from ST platform (default: TRUE).
+#' @param min_counts_per_spot Minimum number of counts per cell.
+#' @param min_counts_per_spot Minimum number of counts per cell.
+#' @param platform Spatial sequencing platform. Choices: "Visium" or "ST".
 #' @param normalize_factor If the normalize factor is null (default setting), normalize_factor=median(UMI per spot)/UMI per spot.
 #' @param window_length Length of the window for the moving average (smoothing). Should be an odd integer (default: 101).
 #' @param denoise Whether perform de-noise step (default: TRUE).
@@ -52,14 +54,18 @@ runCNV <- function(object,
                    ref_group_names,
                    min_ave_counts_per_gene=0.01,
                    min_spots_per_gene=3,
+                   min_counts_per_spot=1,
                    chr_exclude=c('chrX', 'chrY', 'chrM'),
                    max_centered_threshold=3,
                    normalization=TRUE,
+                   platform=c("Visium","ST"),
                    normalize_factor=NULL,
                    window_length=101,
                    denoise=TRUE
 
 ){
+
+  platform <- match.arg(platform)
 
   print("create pre-CNV analysis object ...")
 
@@ -137,10 +143,10 @@ runCNV <- function(object,
   n_count_remove <- nrow(raw.data2)-nrow(raw.data3)
   print(paste("filtered out", n_count_remove, "genes that expressed in less than", min_spots_per_gene, "spots; remaining", nrow(raw.data3), "genes", sep=" "))
 
+  #############################################################################################################################
+
   raw.data.new <- raw.data3
-
   ## extract the genes indicated in the gene ordering file:
-
   same_genes <- intersect(row.names(raw.data.new),row.names(gene_order))
   n_gene <- length(same_genes)
   print(paste("find",n_gene,"mathed genes in the count matrix and gene order file", sep=" "))
@@ -148,6 +154,21 @@ runCNV <- function(object,
   # gene expression matrix has same gene names with the gene order file
   raw.data.combine <- raw.data.new[same_genes, , drop=FALSE]
   gene_order.combine <- gene_order[same_genes, , drop=FALSE]
+
+  ## remove spots that have no counts
+  cs = colSums(raw.data.combine)
+  min_counts_per_spot=1
+  if(sum(cs < min_counts_per_spot)>0){
+    raw.data.combine2 <- raw.data.combine[,-which(cs < min_counts_per_spot),drop=FALSE]
+  }else{
+    raw.data.combine2 <- raw.data.combine
+  }
+
+  n_count_remove <- ncol(raw.data.combine)-ncol(raw.data.combine2)
+  print(paste("filtered out", n_count_remove, "spots that expressed less than", min_counts_per_spot, "counts; remaining", ncol(raw.data4), "spots", sep=" "))
+
+  input_classifications <- input_classifications[rownames(input_classifications) %in% colnames(raw.data.combine2), , drop=FALSE]
+  raw.data.combine2 <- raw.data.combine2[,colnames(raw.data.combine2) %in% rownames(input_classifications)]
 
   # Sort genomic position file and expression file to genomic position file
   # Order genes by genomic region
@@ -168,10 +189,10 @@ runCNV <- function(object,
   gene_order.combine <- gene_order.combine[sorted_indices,,drop=FALSE]
   chr_levels <- unique(gene_order.combine$chr)
   gene_order.combine$chr <- factor(gene_order.combine$chr,levels = chr_levels)
-  raw.data.combine <- raw.data.combine[match(rownames(gene_order.combine), rownames(raw.data.combine)),,drop=FALSE]
+  raw.data.combine2 <- raw.data.combine2[match(rownames(gene_order.combine), rownames(raw.data.combine2)),,drop=FALSE]
 
   ## reorder spot classifications according to expression matrix column names
-  input_classifications <- input_classifications[order(match(row.names(input_classifications), colnames(raw.data.combine))),,drop=FALSE]
+  input_classifications <- input_classifications[order(match(row.names(input_classifications), colnames(raw.data.combine2))),,drop=FALSE]
 
   ## get indices for reference spots
   input_ref_group_names = ref_group_names
@@ -196,7 +217,12 @@ runCNV <- function(object,
     obs_group_spot_indices[[ toString(name_group) ]] <- spot_indices
   }
 
-  object@cnv.data <- raw.data.combine
+
+  img <- object@image
+  img <- img[-which(cs < min_counts_per_spot),,drop=FALSE]
+  object@image <- img
+
+  object@cnv.data <- raw.data.combine2
   object@gene_order <- gene_order.combine
   object@reference_grouped_spot_indices <- ref_group_spot_indices
   object@observation_grouped_spot_indices <- obs_group_spot_indices
@@ -230,6 +256,8 @@ runCNV <- function(object,
 
     i=i+1
   }
+
+
 
   ###########################################
   ## Log transformation
