@@ -165,7 +165,7 @@ runCNV <- function(object,
   }
 
   n_count_remove <- ncol(raw.data.combine)-ncol(raw.data.combine2)
-  print(paste("filtered out", n_count_remove, "spots that expressed less than", min_counts_per_spot, "counts; remaining", ncol(raw.data4), "spots", sep=" "))
+  print(paste("filtered out", n_count_remove, "spots that expressed less than", min_counts_per_spot, "counts; remaining", ncol(raw.data.combine2), "spots", sep=" "))
 
   input_classifications <- input_classifications[rownames(input_classifications) %in% colnames(raw.data.combine2), , drop=FALSE]
   raw.data.combine2 <- raw.data.combine2[,colnames(raw.data.combine2) %in% rownames(input_classifications)]
