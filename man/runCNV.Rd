@@ -11,9 +11,11 @@ runCNV(
   ref_group_names,
   min_ave_counts_per_gene = 0.01,
   min_spots_per_gene = 3,
+  min_counts_per_spot = 1,
   chr_exclude = c("chrX", "chrY", "chrM"),
   max_centered_threshold = 3,
   normalization = TRUE,
+  platform = c("Visium", "ST"),
   normalize_factor = NULL,
   window_length = 101,
   denoise = TRUE
@@ -51,11 +53,13 @@ V1   V2
 
 \item{min_spots_per_gene}{Minimum number of spots requiring expression measurements to include the corresponding gene (default: 3).}
 
+\item{min_counts_per_spot}{Minimum number of counts per cell.}
+
 \item{chr_exclude}{List of chromosomes in the reference genome annotations that should be excluded from analysis (default: c('chrX', 'chrY', 'chrM').}
 
 \item{max_centered_threshold}{Maximum value a value can have after centering. Also sets a lower bound of -1 * this value (default: 3).}
 
-\item{normalization}{Whether perform normalization step. We suggest to skip this step if the SRT data is generated from ST platform (default: TRUE).}
+\item{platform}{Spatial sequencing platform. Choices: "Visium" or "ST".}
 
 \item{normalize_factor}{If the normalize factor is null (default setting), normalize_factor=median(UMI per spot)/UMI per spot.}
 
