@@ -219,7 +219,12 @@ runCNV <- function(object,
 
 
   img <- object@image
-  img <- img[-which(cs < min_counts_per_spot),,drop=FALSE]
+  #img <- img[-which(cs < min_counts_per_spot),,drop=FALSE]
+  indices_to_remove <- which(cs < min_counts_per_spot)
+
+  if (length(indices_to_remove) > 0) {
+  img <- img[-indices_to_remove, , drop=FALSE]
+  }
   object@image <- img
 
   object@cnv.data <- raw.data.combine2
