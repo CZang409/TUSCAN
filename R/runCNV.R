@@ -398,9 +398,8 @@ subtract_normal <- function(object) {
 #' @noRd
 #
 
-clear_noise_via_ref_mean_sd <- function(object) {
+clear_noise_via_ref_mean_sd <- function(object, sd_amplifier=1.5) {
 
-  sd_amplifier=1.5
   ref_idx = unlist(object@reference_grouped_spot_indices)
   vals = object@cnv.data[,ref_idx]
   mean_ref_vals = mean(vals)
