@@ -37,3 +37,6 @@ BiocManager::install("ConsensusClusterPlus")
 
 ## Tutorial
 Details in [Tutorial](https://czang409.github.io/TUSCAN/)
+
+## Citation
+[Zang, C., Guo, C. C., Wang, Y., Wei, P., & Li, Z. (2026). TUSCAN: Tumor segmentation and classification analysis in spatial transcriptomics. *PLoS computational biology*, 22(3), e1014058.](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1014058)
